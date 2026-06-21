@@ -1,0 +1,35 @@
+name: Repo Hygiene
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  hygiene:
+    name: Check repository hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check forbidden local artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          forbidden_regex='(^|/)(terraform\.tfstate(\..*)?|\.terraform/|\.env(\..*)?|secrets/|private/|data/|models/|backups/|matrix-data/|bot-session/|bot-store/)'
+          if git ls-files | grep -E "$forbidden_regex"; then
+            echo "Forbidden local, secret, state, or runtime artifact is tracked."
+            exit 1
+          fi
+
+      - name: Check docs links for moved planning files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f docs/superpowers/specs/2026-06-21-hermes-ai-oci-matrix-design.md
+          test -f docs/superpowers/plans/2026-06-21-hermes-ai-oci-matrix-execution.md

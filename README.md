@@ -1,0 +1,55 @@
+# OCI Hermes
+
+OCI Hermes is a public, account-neutral project for hydrating a private Hermes AI environment on cloud infrastructure.
+
+The v1 target is a private-use Hermes deployment on OCI Always Free: Matrix for the user-facing chat surface, a local LLM runtime by default, optional external model calls only after explicit approval, encrypted operational storage, backups, monitoring, and recovery runbooks.
+
+## Current Status
+
+This repository is in planning and scaffold phase. The design and execution checklist are checked in under `docs/superpowers/`:
+
+- [Design spec](docs/superpowers/specs/2026-06-21-hermes-ai-oci-matrix-design.md)
+- [Execution checklist](docs/superpowers/plans/2026-06-21-hermes-ai-oci-matrix-execution.md)
+
+## Project Goals
+
+- Hydrate reproducible cloud environments for private Hermes AI deployments.
+- Keep deployer infrastructure isolated to the deployer's own provider accounts.
+- Prefer local inference and private services by default.
+- Keep secrets, Terraform state, provider credentials, model tokens, Matrix recovery keys, and backup passphrases out of git.
+- Make the repository public and contribution-friendly through forks, branches, and pull requests.
+
+## Account And Provider Boundary
+
+Every deployer must use their own cloud, DNS, backup, and model provider accounts.
+
+This project must not include or depend on any maintainer-owned provider account, billing profile, API key, Terraform state backend, DNS token, storage bucket, Matrix homeserver data, model cache, or deployed service endpoint. Examples and templates must use placeholders or deployer-owned values only.
+
+## Planned Layout
+
+```text
+infra/oci/          Terraform-compatible OCI infrastructure
+deploy/compose/     Docker Compose service definitions
+deploy/caddy/       Caddy configuration templates
+deploy/systemd/     Host service and timer templates
+scripts/            Health, backup, update, DNS, and operational helpers
+docs/runbooks/      Setup, recovery, update, backup, and incident runbooks
+docs/superpowers/   Design specs and execution plans
+```
+
+## Contribution Model
+
+This is intended to be a public GitHub repository. Forks, feature branches, and pull requests from authenticated GitHub users are welcome.
+
+Before opening a pull request:
+
+1. Keep provider-specific values out of the repository.
+2. Use placeholders for account IDs, hostnames, email addresses, tokens, and keys.
+3. Document security impact for infrastructure, identity, network, secrets, backup, or model-routing changes.
+4. Update the relevant runbook or design document when operational behavior changes.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
+
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE).
