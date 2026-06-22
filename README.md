@@ -18,6 +18,7 @@ This repository is in planning and scaffold phase. The design and execution chec
 - Prefer local inference and private services by default.
 - Keep secrets, Terraform state, provider credentials, model tokens, Matrix recovery keys, and backup passphrases out of git.
 - Make the repository public and contribution-friendly through forks, branches, and pull requests.
+- Preserve the spirit of open collaboration: use it, fork it, deploy it, sell services around it, and keep distributed changes to project files open under the same license.
 
 ## Account And Provider Boundary
 
@@ -52,4 +53,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
 
 ## License
 
-Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE).
+Licensed under the Mozilla Public License 2.0. See [LICENSE](LICENSE).
+
+Plain English intent: use this project freely, credit the work by keeping license notices intact, and keep distributed modifications to this repository's files open source. Private deployments, local secrets, account-specific configuration, and separate client work do not belong in this repository.
+
+The project may later split documentation under a documentation-specific license such as CC BY 4.0, while keeping code, templates, and scripts under MPL-2.0.

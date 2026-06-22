@@ -20,6 +20,16 @@ local-overrides/
 *.p12
 *.crt
 *.csr
+*.token
+*.secret
+*.secrets
+*.passphrase
+*.password
+duckdns-token*
+matrix-token*
+openai-api-key*
+restic-password*
+restic-passphrase*
 id_rsa*
 id_ed25519*
 secrets/

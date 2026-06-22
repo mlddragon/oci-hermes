@@ -40,11 +40,8 @@
 ## DNS Setup
 
 - [ ] Log in to DuckDNS.
-- [ ] Try hostname order:
-  - `example-private-1.duckdns.org`
-  - `example-private-2.duckdns.org`
-  - `example-private-3.duckdns.org`
-- [ ] If all are taken, choose a short random neutral label.
+- [ ] Choose a deployer-owned DuckDNS hostname such as `REPLACE_WITH_YOUR_DUCKDNS_HOSTNAME`.
+- [ ] Use a short random neutral label that does not reveal services such as `matrix`, `hermes`, `ai`, `chat`, `server`, or `cloud`.
 - [ ] Store DuckDNS token in password manager.
 - [ ] Later store DuckDNS runtime token only in root-owned VM secret file.
 

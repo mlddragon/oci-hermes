@@ -37,13 +37,9 @@ Terraform Community Edition is used first for career familiarity, with plain Ter
 
 ## DNS And Public Access
 
-The Matrix homeserver uses a neutral DuckDNS name. Preference order:
+The Matrix homeserver uses a neutral deployer-owned DuckDNS name such as `REPLACE_WITH_YOUR_DUCKDNS_HOSTNAME`.
 
-1. `example-private-1.duckdns.org`
-2. `example-private-2.duckdns.org`
-3. `example-private-3.duckdns.org`
-
-If those are taken, choose a neutral fallback by using a short random neutral label. Avoid names that reveal services, such as `matrix`, `hermes`, `ai`, `chat`, `server`, or `cloud`.
+Choose a short neutral label. Avoid names that reveal services, such as `matrix`, `hermes`, `ai`, `chat`, `server`, or `cloud`.
 
 Use a reserved OCI public IPv4 only if final provisioning confirms it is Always Free-safe. Configure a DuckDNS update script either way so the chosen hostname tracks the current OCI public IP.
 

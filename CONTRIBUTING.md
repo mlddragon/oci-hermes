@@ -9,6 +9,7 @@ OCI Hermes is public and accepts contributions through forks, branches, and pull
 - Do not commit secrets, Terraform state, generated private keys, local model caches, Matrix data, backup artifacts, or `.env` files.
 - Keep changes scoped. Infrastructure, runtime, security, and operations changes should include docs or runbook updates.
 - Prefer provider-neutral language where possible; OCI is the first implementation target, not a requirement for every future design.
+- By contributing, you agree that your contribution is licensed under this repository's current license structure. Today, that is MPL-2.0 for the whole repository.
 
 ## Pull Requests
 
@@ -28,3 +29,11 @@ For infrastructure or deployment changes, include:
 ## Local Development
 
 This scaffold intentionally avoids live provider credentials. Work against examples, local checks, and disposable deployer-owned test accounts only.
+
+Before contributing infrastructure, deployment, or runtime code, run a local secret scan such as:
+
+```sh
+gitleaks detect --source .
+```
+
+If `gitleaks` is unavailable, use an equivalent scanner such as TruffleHog before opening a pull request.

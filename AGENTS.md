@@ -32,6 +32,10 @@ This repo is public and account-neutral. Contributors and automated agents must 
 
 Anyone deploying from this repo must provision into their own provider accounts. The repository must not assume access to the maintainer's accounts or any other contributor's accounts.
 
+## License Intent
+
+The repository is licensed under MPL-2.0. Preserve license notices, keep distributed modifications to repository files under MPL-2.0, and do not add separate licensing unless a maintainer explicitly asks for it. The project may later split documentation under a documentation-specific license such as CC BY 4.0.
+
 ## Current Implementation Stage
 
 The repository currently contains design and execution planning materials plus scaffold configuration. Infrastructure, deployment, and operational scripts should be added incrementally behind reviewed pull requests.
