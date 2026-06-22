@@ -4,6 +4,9 @@ title: "[Feature]: "
 labels:
   - enhancement
 body:
+  - type: markdown
+    attributes:
+      value: Do not include secrets, tokens, provider account IDs, hostnames, public IPs, private endpoints, Matrix data, Terraform state, SSH keys, or passphrases.
   - type: textarea
     id: problem
     attributes:
@@ -25,3 +28,10 @@ body:
       description: Note affected provider resources, exposed ports, identities, secrets, recurring costs, or runbooks.
     validations:
       required: true
+  - type: checkboxes
+    id: boundary
+    attributes:
+      label: Deployment boundary
+      options:
+        - label: I removed or redacted provider account IDs, secrets, private endpoints, Matrix data, Terraform state, hostnames, IPs, SSH keys, and passphrases.
+          required: true
