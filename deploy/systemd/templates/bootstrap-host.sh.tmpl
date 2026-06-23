@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get update
+apt-get install -y \
+  ca-certificates \
+  caddy \
+  curl \
+  docker.io \
+  docker-compose-plugin \
+  fail2ban \
+  jq \
+  restic \
+  ufw \
+  unattended-upgrades
+
+systemctl enable --now docker
+systemctl enable --now caddy
+systemctl enable --now fail2ban
+systemctl enable --now unattended-upgrades
+
+install -d -m 755 /opt/hermes-ai
+install -d -m 755 /opt/hermes-ai/deploy
+install -d -m 755 /opt/hermes-ai/deploy/caddy
+install -d -m 755 /opt/hermes-ai/deploy/compose
+install -d -m 700 /opt/hermes-ai/secrets
+install -d -m 755 /opt/hermes-ai/data
+install -d -m 700 /opt/hermes-ai/data/matrix
+install -d -m 700 /opt/hermes-ai/data/bot-store
+install -d -m 750 /opt/hermes-ai/data/audit
+install -d -m 755 /opt/hermes-ai/models/ollama
+install -d -m 700 /opt/hermes-ai/backups
+install -d -m 700 /opt/hermes-ai/restore-test
+
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow from {{SSH_ALLOWED_CIDR}} to any port 22 proto tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw --force enable
+
+if grep -q '^#\?PasswordAuthentication' /etc/ssh/sshd_config; then
+  sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+else
+  echo 'PasswordAuthentication no' >> /etc/ssh/sshd_config
+fi
+
+systemctl reload ssh || systemctl reload sshd
+
+echo "Host bootstrap complete for {{DUCKDNS_HOSTNAME}}."

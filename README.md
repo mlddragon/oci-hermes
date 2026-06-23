@@ -6,10 +6,24 @@ The v1 target is a private-use Hermes deployment on OCI Always Free: Matrix for 
 
 ## Current Status
 
-This repository is in planning and scaffold phase. The design and execution checklist are checked in under `docs/superpowers/`:
+This repository is in deploy-tooling scaffold phase. The design and execution checklist are checked in under `docs/superpowers/`, and the safe CLI entrypoint is `scripts/hermesctl`:
 
 - [Design spec](docs/superpowers/specs/2026-06-21-hermes-ai-oci-matrix-design.md)
 - [Execution checklist](docs/superpowers/plans/2026-06-21-hermes-ai-oci-matrix-execution.md)
+- [First deployment runbook](docs/runbooks/first-deployment.md)
+
+Safe local review flow:
+
+```bash
+scripts/hermesctl doctor
+scripts/hermesctl init
+scripts/hermesctl secrets-check
+scripts/hermesctl render
+scripts/hermesctl plan
+```
+
+Commands after `plan` may create or change deployer-owned cloud or host
+resources and require typed confirmation.
 
 ## Project Goals
 

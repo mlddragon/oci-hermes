@@ -1,0 +1,9 @@
+[Unit]
+Description=Update DuckDNS record for Hermes
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/opt/hermes-ai/secrets/duckdns.env
+ExecStart=/usr/bin/curl -fsS "https://www.duckdns.org/update?domains=${DUCKDNS_DOMAIN}&token=${DUCKDNS_TOKEN}&ip="
