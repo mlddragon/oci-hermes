@@ -21,7 +21,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          forbidden_regex='(^|/)(terraform\.tfstate(\..*)?|\.terraform/|\.env(\..*)?|secrets/|private/|data/|models/|backups/|matrix-data/|bot-session/|bot-store/)'
+          forbidden_regex='(^|/)(terraform\.tfstate(\..*)?|\.terraform/|\.terraform\.lock\.hcl|\.env(\..*)?|\.hermes/|\.worktrees/|[^/]+\.tfplan|[^/]+\.tfvars(\.json)?|secrets/|private/|data/|models/|backups/|matrix-data/|bot-session/|bot-store/)$'
           if git ls-files | grep -E "$forbidden_regex"; then
             echo "Forbidden local, secret, state, or runtime artifact is tracked."
             exit 1

@@ -1,0 +1,20 @@
+{{DUCKDNS_HOSTNAME}} {
+  encode zstd gzip
+
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "no-referrer"
+  }
+
+  handle /.well-known/matrix/client {
+    header Content-Type application/json
+    respond `{"m.homeserver":{"base_url":"https://{{DUCKDNS_HOSTNAME}}"}}`
+  }
+
+  handle /_matrix/* {
+    reverse_proxy 127.0.0.1:8008
+  }
+
+  respond 404
+}

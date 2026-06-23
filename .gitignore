@@ -12,6 +12,8 @@
 !.env.example
 *.local
 local-overrides/
+.hermes/
+.worktrees/
 
 # Secrets and keys
 *.pem
@@ -45,6 +47,7 @@ terraform.tfstate.*
 *.tfplan
 *.tfvars
 *.tfvars.json
+*.auto.tfvars.json
 crash.log
 crash.*.log
 override.tf

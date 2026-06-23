@@ -1,0 +1,51 @@
+name: hermes-ai
+
+services:
+  matrix:
+    image: ${MATRIX_IMAGE}
+    container_name: hermes-matrix
+    restart: unless-stopped
+    env_file:
+      - ./hermes.env
+    ports:
+      - "127.0.0.1:8008:8008"
+    volumes:
+      - /opt/hermes-ai/data/matrix:/data
+    networks:
+      - matrix_private
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: hermes-ollama
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - /opt/hermes-ai/models/ollama:/root/.ollama
+    networks:
+      - ai_private
+
+  hermes-bridge:
+    build:
+      context: ./hermes-bridge
+    container_name: hermes-bridge
+    restart: "no"
+    env_file:
+      - ./hermes.env
+    volumes:
+      - /opt/hermes-ai/data/bot-store:/var/lib/hermes-bridge
+      - /opt/hermes-ai/data/audit:/var/log/hermes-audit
+    networks:
+      - matrix_private
+      - ai_private
+    depends_on:
+      - matrix
+      - ollama
+    profiles:
+      - bridge
+
+networks:
+  matrix_private:
+    internal: false
+  ai_private:
+    internal: true

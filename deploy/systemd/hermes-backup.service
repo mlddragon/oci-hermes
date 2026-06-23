@@ -1,0 +1,9 @@
+[Unit]
+Description=Hermes encrypted Restic backup
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/opt/hermes-ai/secrets/restic.env
+ExecStart=/usr/bin/restic backup /opt/hermes-ai/data /opt/hermes-ai/deploy

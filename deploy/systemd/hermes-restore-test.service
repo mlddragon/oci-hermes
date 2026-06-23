@@ -1,0 +1,9 @@
+[Unit]
+Description=Hermes Restic restore test
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/opt/hermes-ai/secrets/restic.env
+ExecStart=/usr/bin/bash -lc 'rm -rf /opt/hermes-ai/restore-test/latest && mkdir -p /opt/hermes-ai/restore-test/latest && restic restore latest --target /opt/hermes-ai/restore-test/latest'
