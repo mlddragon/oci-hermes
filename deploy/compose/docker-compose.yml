@@ -2,11 +2,12 @@ name: hermes-ai
 
 services:
   matrix:
-    image: ${MATRIX_IMAGE}
+    image: ${MATRIX_IMAGE:-ghcr.io/girlbossceo/conduwuit:latest}
     container_name: hermes-matrix
     restart: unless-stopped
     env_file:
-      - ./hermes.env
+      - path: ./hermes.env
+        required: false
     ports:
       - "127.0.0.1:8008:8008"
     volumes:
@@ -29,10 +30,12 @@ services:
     build:
       context: ./hermes-bridge
     container_name: hermes-bridge
-    restart: "no"
+    restart: unless-stopped
     env_file:
-      - ./hermes.env
+      - path: ./hermes.env
+        required: false
     volumes:
+      - /opt/hermes-ai/secrets/matrix-hermes-password:/opt/hermes-ai/secrets/matrix-hermes-password:ro
       - /opt/hermes-ai/data/bot-store:/var/lib/hermes-bridge
       - /opt/hermes-ai/data/audit:/var/log/hermes-audit
     networks:
