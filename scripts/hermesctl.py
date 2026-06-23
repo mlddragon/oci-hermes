@@ -78,6 +78,7 @@ def cmd_secrets_check(_: argparse.Namespace) -> None:
     required = [
         "DuckDNS token",
         "Matrix admin, primary, secondary, hermes, and ops passwords",
+        "Hermes Matrix bot password for the bridge secret file",
         "Matrix recovery keys/passphrases stored off-VM",
         "Restic passphrase",
     ]
@@ -155,18 +156,21 @@ def cmd_deploy_runtime(args: argparse.Namespace) -> None:
     duckdns_token = os.environ.get("HERMES_DUCKDNS_TOKEN") or ask_secret("DuckDNS token")
     restic_repository = os.environ.get("HERMES_RESTIC_REPOSITORY") or ask("Restic repository URL, for example oci:bucket:path")
     restic_passphrase = os.environ.get("HERMES_RESTIC_PASSPHRASE") or ask_secret("Restic passphrase")
+    matrix_hermes_password = os.environ.get("HERMES_MATRIX_PASSWORD") or ask_secret("Hermes Matrix bot password")
     openai_key = ""
     if config.openai_enabled:
         openai_key = os.environ.get("OPENAI_API_KEY") or ask_secret("OpenAI API key")
     for source in [RENDER_DIR / "caddy/Caddyfile", RENDER_DIR / "compose/hermes.env"]:
         if not source.exists():
             raise SystemExit(f"Missing rendered file: {source}. Run scripts/hermesctl render first.")
-    run(["ssh", f"ubuntu@{host}", "sudo install -d -m 755 /opt/hermes-ai/deploy/caddy /opt/hermes-ai/deploy/compose /opt/hermes-ai/deploy/compose/hermes-bridge"])
+    run(["ssh", f"ubuntu@{host}", "sudo rm -rf /tmp/hermes-bridge-src && sudo install -d -m 755 /opt/hermes-ai/deploy/caddy /opt/hermes-ai/deploy/compose /opt/hermes-ai/deploy/compose/hermes-bridge"])
     run(["scp", str(RENDER_DIR / "caddy/Caddyfile"), f"ubuntu@{host}:/tmp/hermes-Caddyfile"])
     run(["scp", str(RENDER_DIR / "compose/hermes.env"), f"ubuntu@{host}:/tmp/hermes.env"])
     run(["scp", str(REPO_ROOT / "deploy/compose/docker-compose.yml"), f"ubuntu@{host}:/tmp/hermes-docker-compose.yml"])
     run(["scp", str(REPO_ROOT / "deploy/compose/hermes-bridge/Dockerfile"), f"ubuntu@{host}:/tmp/hermes-bridge-Dockerfile"])
-    run(["scp", str(REPO_ROOT / "deploy/compose/hermes-bridge/bridge.py"), f"ubuntu@{host}:/tmp/hermes-bridge.py"])
+    run(["scp", str(REPO_ROOT / "deploy/compose/hermes-bridge/Cargo.toml"), f"ubuntu@{host}:/tmp/hermes-bridge-Cargo.toml"])
+    run(["scp", str(REPO_ROOT / "deploy/compose/hermes-bridge/Cargo.lock"), f"ubuntu@{host}:/tmp/hermes-bridge-Cargo.lock"])
+    run(["scp", "-r", str(REPO_ROOT / "deploy/compose/hermes-bridge/src"), f"ubuntu@{host}:/tmp/hermes-bridge-src"])
     run(["scp", str(REPO_ROOT / "deploy/systemd/hermes-compose.service"), f"ubuntu@{host}:/tmp/hermes-compose.service"])
     run(["scp", str(REPO_ROOT / "deploy/systemd/hermes-backup.service"), f"ubuntu@{host}:/tmp/hermes-backup.service"])
     run(["scp", str(REPO_ROOT / "deploy/systemd/hermes-backup.timer"), f"ubuntu@{host}:/tmp/hermes-backup.timer"])
@@ -174,10 +178,11 @@ def cmd_deploy_runtime(args: argparse.Namespace) -> None:
     run(["scp", str(REPO_ROOT / "deploy/systemd/hermes-duckdns.service"), f"ubuntu@{host}:/tmp/hermes-duckdns.service"])
     run(["scp", str(REPO_ROOT / "deploy/systemd/hermes-duckdns.timer"), f"ubuntu@{host}:/tmp/hermes-duckdns.timer"])
     run(["ssh", f"ubuntu@{host}", "sudo install -m 644 /tmp/hermes-Caddyfile /opt/hermes-ai/deploy/caddy/Caddyfile && sudo install -m 644 /tmp/hermes-Caddyfile /etc/caddy/Caddyfile && sudo install -m 600 /tmp/hermes.env /opt/hermes-ai/deploy/compose/hermes.env"])
-    run(["ssh", f"ubuntu@{host}", "sudo install -m 644 /tmp/hermes-docker-compose.yml /opt/hermes-ai/deploy/compose/docker-compose.yml && sudo install -m 644 /tmp/hermes-bridge-Dockerfile /opt/hermes-ai/deploy/compose/hermes-bridge/Dockerfile && sudo install -m 644 /tmp/hermes-bridge.py /opt/hermes-ai/deploy/compose/hermes-bridge/bridge.py"])
+    run(["ssh", f"ubuntu@{host}", "sudo install -m 644 /tmp/hermes-docker-compose.yml /opt/hermes-ai/deploy/compose/docker-compose.yml && sudo install -m 644 /tmp/hermes-bridge-Dockerfile /opt/hermes-ai/deploy/compose/hermes-bridge/Dockerfile && sudo install -m 644 /tmp/hermes-bridge-Cargo.toml /opt/hermes-ai/deploy/compose/hermes-bridge/Cargo.toml && sudo install -m 644 /tmp/hermes-bridge-Cargo.lock /opt/hermes-ai/deploy/compose/hermes-bridge/Cargo.lock && sudo rm -rf /opt/hermes-ai/deploy/compose/hermes-bridge/src && sudo cp -R /tmp/hermes-bridge-src /opt/hermes-ai/deploy/compose/hermes-bridge/src && sudo chown -R root:root /opt/hermes-ai/deploy/compose/hermes-bridge/src && sudo find /opt/hermes-ai/deploy/compose/hermes-bridge/src -type d -exec chmod 755 {} + && sudo find /opt/hermes-ai/deploy/compose/hermes-bridge/src -type f -exec chmod 644 {} +"])
     run(["ssh", f"ubuntu@{host}", "sudo install -m 644 /tmp/hermes-compose.service /etc/systemd/system/hermes-compose.service && sudo install -m 644 /tmp/hermes-backup.service /etc/systemd/system/hermes-backup.service && sudo install -m 644 /tmp/hermes-backup.timer /etc/systemd/system/hermes-backup.timer && sudo install -m 644 /tmp/hermes-restore-test.service /etc/systemd/system/hermes-restore-test.service && sudo install -m 644 /tmp/hermes-duckdns.service /etc/systemd/system/hermes-duckdns.service && sudo install -m 644 /tmp/hermes-duckdns.timer /etc/systemd/system/hermes-duckdns.timer && sudo systemctl daemon-reload && sudo systemctl reload caddy"])
     install_secret_file(host, "duckdns.env", f"DUCKDNS_DOMAIN={config.duckdns_hostname.removesuffix('.duckdns.org')}\nDUCKDNS_TOKEN={duckdns_token}\n")
     install_secret_file(host, "restic.env", f"RESTIC_REPOSITORY={restic_repository}\nRESTIC_PASSWORD={restic_passphrase}\n")
+    install_secret_file(host, "matrix-hermes-password", f"{matrix_hermes_password}\n")
     if openai_key:
         install_secret_file(host, "openai.env", f"OPENAI_API_KEY={openai_key}\n")
     print("Runtime files copied. Start services with the runbook after reviewing rendered Compose files.")
@@ -203,7 +208,11 @@ def cmd_verify(args: argparse.Namespace) -> None:
     checks = [
         ["ssh", f"ubuntu@{host}", "systemctl is-active caddy || true"],
         ["ssh", f"ubuntu@{host}", "sudo ufw status verbose || true"],
+        ["ssh", f"ubuntu@{host}", "sudo test -f /opt/hermes-ai/secrets/matrix-hermes-password && sudo stat -c '%U %a %n' /opt/hermes-ai/secrets/matrix-hermes-password || true"],
+        ["ssh", f"ubuntu@{host}", "cd /opt/hermes-ai/deploy/compose && sudo docker compose --env-file hermes.env --profile bridge config >/dev/null && echo compose-config-ok || true"],
         ["ssh", f"ubuntu@{host}", "sudo docker ps --format '{{.Names}} {{.Ports}}' || true"],
+        ["ssh", f"ubuntu@{host}", "sudo docker ps --filter name=hermes-bridge --format '{{.Names}} {{.Status}}' || true"],
+        ["ssh", f"ubuntu@{host}", "sudo test -f /opt/hermes-ai/data/audit/bridge-events.jsonl && echo bridge-audit-log-present || true"],
         ["curl", "-fsS", f"https://{config.duckdns_hostname}/_matrix/client/versions"],
     ]
     for check in checks:

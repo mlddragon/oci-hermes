@@ -82,6 +82,7 @@ tmp/
 dist/
 build/
 coverage/
+target/
 
 # Python
 __pycache__/

@@ -1,9 +1,17 @@
-FROM python:3.12-slim
+FROM rust:latest AS builder
 
 WORKDIR /app
-COPY bridge.py /app/bridge.py
+ENV CARGO_BUILD_JOBS=1
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
+RUN cargo build --release --locked
 
-RUN useradd --system --home /var/lib/hermes-bridge --create-home hermes
-USER hermes
+FROM debian:bookworm-slim
 
-CMD ["python", "/app/bridge.py"]
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/target/release/hermes-bridge /usr/local/bin/hermes-bridge
+
+CMD ["/usr/local/bin/hermes-bridge"]

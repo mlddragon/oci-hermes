@@ -11,6 +11,7 @@ use someone else's cloud, DNS, backup, Matrix, model, or OpenAI account.
 - A dedicated Hermes SSH key exists outside the repo.
 - A deployer-owned DuckDNS hostname and token are available.
 - Restic passphrase is stored outside OCI and outside this repo.
+- The `hermes` Matrix bot password is stored outside OCI and outside this repo.
 - Matrix recovery secrets will be stored in a password manager and offline copy.
 
 ## Review-Only Path
@@ -40,9 +41,10 @@ use someone else's cloud, DNS, backup, Matrix, model, or OpenAI account.
 1. Configure DuckDNS to the assigned OCI public IP.
 2. Confirm HTTPS reaches the Matrix client endpoint.
 3. Run the Matrix E2EE runbook.
-4. Run the model setup runbook.
-5. Run the backup and restore-test runbook.
-6. Run `scripts/hermesctl verify --host "$HERMES_HOST"`.
+4. Start the bridge profile only after bot login, trusted inviter, and Element device verification steps are complete.
+5. Run the model setup runbook.
+6. Run the backup and restore-test runbook.
+7. Run `scripts/hermesctl verify --host "$HERMES_HOST"`.
 
 ## Stop Conditions
 
@@ -51,4 +53,6 @@ use someone else's cloud, DNS, backup, Matrix, model, or OpenAI account.
 - Any real secret appears in `git status`, `git diff`, CLI output, logs, or docs.
 - Backend ports are publicly reachable.
 - Matrix E2EE recovery has not been tested.
+- Hermes bot device verification has not been completed.
+- The bridge audit log contains raw prompt or response text.
 - Restic restore test has not passed.

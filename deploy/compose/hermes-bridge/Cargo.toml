@@ -1,0 +1,34 @@
+[package]
+name = "hermes-bridge"
+version = "0.1.0"
+edition = "2021"
+license = "MPL-2.0"
+publish = false
+
+[[bin]]
+name = "hermes-bridge"
+path = "src/main.rs"
+required-features = ["matrix-runtime"]
+
+[features]
+default = ["matrix-runtime"]
+matrix-runtime = ["dep:matrix-sdk"]
+
+[dependencies]
+anyhow = "1.0"
+chrono = { version = "0.4", default-features = false, features = ["clock", "serde"] }
+hex = "0.4"
+matrix-sdk = { version = "0.18", features = ["sqlite"], optional = true }
+reqwest = { version = "0.13", default-features = false, features = ["json", "rustls"] }
+ruma = "0.16"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+thiserror = "2.0"
+tokio = { version = "1.40", features = ["fs", "macros", "rt-multi-thread", "signal"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+url = "2.5"
+
+[dev-dependencies]
+tempfile = "3.12"
