@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import sys
+import time
 from dataclasses import asdict
 from pathlib import Path
 
@@ -12,9 +13,12 @@ from lib.constants import CONFIG_FILE, LOCAL_DIR, RENDER_DIR, REPO_ROOT
 from lib.oci_checks import oci_auth_summary, public_key_exists, tool_status
 from lib.prompting import ask, ask_bool, ask_secret, require_phrase
 from lib.redaction import redact_mapping, redact_text
-from lib.runner import run
+from lib.runner import CommandError, run, set_verbose
 from lib.templates import render_all
 from lib.validation import ConfigError
+
+OCI_CAPACITY_ERROR = "Out of host capacity"
+REAPPLY_RETRY_SECONDS = 600
 
 
 def print_json(data: object) -> None:
@@ -118,10 +122,52 @@ def cmd_plan(_: argparse.Namespace) -> None:
     run([tofu, "plan", f"-var-file={tfvars}"], cwd=infra_dir)
 
 
-def cmd_apply(_: argparse.Namespace) -> None:
+def tofu_automation_env() -> dict[str, str]:
+    env = os.environ.copy()
+    # OpenTofu/Terraform write diagnostic errors to /dev/tty when stdin is a TTY,
+    # which bypasses stdout capture. Automation mode keeps output on the pipe.
+    env["TF_IN_AUTOMATION"] = "1"
+    return env
+
+
+def tofu_apply_command(tfvars: Path, *, auto_approve: bool = False) -> list[str]:
+    command = [tofu_binary(), "apply", "-no-color", f"-var-file={tfvars}"]
+    if auto_approve:
+        command.append("-auto-approve")
+    return command
+
+
+def run_tofu_apply(args: argparse.Namespace, *, retry_on_capacity: bool) -> None:
     tfvars = require_rendered_tfvars()
     require_phrase("APPLY OCI HERMES", "Cloud resources will be created or changed")
-    run([tofu_binary(), "apply", f"-var-file={tfvars}"], cwd=REPO_ROOT / "infra/oci")
+    cwd = REPO_ROOT / "infra/oci"
+    if not retry_on_capacity:
+        run(tofu_apply_command(tfvars), cwd=cwd, stream=True)
+        return
+
+    command = tofu_apply_command(tfvars, auto_approve=True)
+    env = tofu_automation_env()
+    while True:
+        result = run(command, cwd=cwd, stream=True, stream_capture=True, check=False, env=env)
+        output = result.stdout or ""
+        if OCI_CAPACITY_ERROR in output:
+            print(
+                f"OCI host capacity unavailable; sleeping {REAPPLY_RETRY_SECONDS // 60} minutes before retrying.",
+                file=sys.stderr,
+            )
+            time.sleep(REAPPLY_RETRY_SECONDS)
+            continue
+        if result.returncode != 0:
+            raise SystemExit(result.returncode)
+        return
+
+
+def cmd_apply(args: argparse.Namespace) -> None:
+    run_tofu_apply(args, retry_on_capacity=False)
+
+
+def cmd_reapply(args: argparse.Namespace) -> None:
+    run_tofu_apply(args, retry_on_capacity=True)
 
 
 def require_remote_host(args: argparse.Namespace) -> str:
@@ -248,6 +294,12 @@ def cmd_teardown_plan(_: argparse.Namespace) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Deploy and operate OCI Hermes safely.")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show tracebacks and other debug-only command output.",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("doctor").set_defaults(func=cmd_doctor)
@@ -258,6 +310,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("render").set_defaults(func=cmd_render)
     sub.add_parser("plan").set_defaults(func=cmd_plan)
     sub.add_parser("apply").set_defaults(func=cmd_apply)
+    sub.add_parser("reapply").set_defaults(func=cmd_reapply)
 
     for name, func in {
         "bootstrap-host": cmd_bootstrap_host,
@@ -279,11 +332,22 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    set_verbose(args.verbose)
     try:
         args.func(args)
     except ConfigError as exc:
         print(f"Config error: {exc}", file=sys.stderr)
         return 2
+    except CommandError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    except SystemExit as exc:
+        raise exc
+    except Exception as exc:
+        if args.verbose:
+            raise
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
     return 0
 
 

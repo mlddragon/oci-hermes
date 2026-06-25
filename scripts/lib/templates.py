@@ -48,7 +48,7 @@ def render_all(config: HermesConfig, output_dir: Path = RENDER_DIR) -> list[Path
     values = template_values(config)
     rendered: list[Path] = []
     specs = [
-        (REPO_ROOT / "infra/oci/templates/terraform.tfvars.json.tmpl", output_dir / "terraform.tfvars.json", None),
+        (REPO_ROOT / "infra/oci/templates/terraform-vars.json.tmpl", output_dir / "terraform.tfvars.json", None),
         (REPO_ROOT / "deploy/caddy/templates/Caddyfile.tmpl", output_dir / "caddy/Caddyfile", None),
         (REPO_ROOT / "deploy/compose/config/hermes.env.tmpl", output_dir / "compose/hermes.env", 0o600),
         (REPO_ROOT / "deploy/systemd/templates/bootstrap-host.sh.tmpl", output_dir / "bootstrap-host.sh", 0o700),
