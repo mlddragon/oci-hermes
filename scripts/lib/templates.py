@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from .config import HermesConfig
@@ -9,7 +10,7 @@ def render_text(template: str, values: dict[str, object]) -> str:
     output = template
     for key, value in values.items():
         output = output.replace("{{" + key + "}}", str(value))
-    if "{{" in output or "}}" in output:
+    if re.search(r"\{\{[A-Z0-9_]+\}\}", output):
         raise ValueError("Rendered template still contains unresolved placeholders.")
     return output
 
