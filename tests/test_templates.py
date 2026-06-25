@@ -22,12 +22,33 @@ class TemplateTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             render_text("host={{DUCKDNS_HOSTNAME}} missing={{MISSING}}", {"DUCKDNS_HOSTNAME": "quiet-river-47.duckdns.org"})
 
+    def test_render_text_allows_literal_json_braces_after_replacement(self):
+        rendered = render_text(
+            'respond `{"m.homeserver":{"base_url":"https://{{DUCKDNS_HOSTNAME}}"}}`',
+            {"DUCKDNS_HOSTNAME": "quiet-river-47.duckdns.org"},
+        )
+
+        self.assertEqual(
+            rendered,
+            'respond `{"m.homeserver":{"base_url":"https://quiet-river-47.duckdns.org"}}`',
+        )
+
     def test_template_values_are_placeholder_free_for_default_config(self):
         config = HermesConfig()
         values = template_values(config, compartment_ocid="compartment-placeholder")
 
         self.assertEqual(values["REGION"], "us-chicago-1")
         self.assertEqual(values["DUCKDNS_HOSTNAME"], "private-neutral-name.duckdns.org")
+
+    def test_terraform_vars_template_renders_without_unresolved_placeholders(self):
+        config = HermesConfig()
+        values = template_values(config, compartment_ocid="compartment-placeholder")
+        template = (REPO_ROOT / "infra/oci/templates/terraform-vars.json.tmpl").read_text(encoding="utf-8")
+
+        rendered = render_text(template, values)
+
+        self.assertIn('"region": "us-chicago-1"', rendered)
+        self.assertNotIn("{{", rendered)
 
     def test_compose_env_template_renders_bridge_values(self):
         config = HermesConfig()
