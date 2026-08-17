@@ -11,6 +11,9 @@ This repository is in deploy-tooling scaffold phase. The design and execution ch
 - [Design spec](docs/superpowers/specs/2026-06-21-hermes-ai-oci-matrix-design.md)
 - [Execution checklist](docs/superpowers/plans/2026-06-21-hermes-ai-oci-matrix-execution.md)
 - [First deployment runbook](docs/runbooks/first-deployment.md)
+- [Cross-system AI routing](docs/AI-START-HERE.md)
+
+Repository tooling and runbooks do not prove a live OCI deployment. Treat production deployment, backup/restore, Matrix E2EE, and acceptance status as unverified until direct deployment evidence satisfies the documented gates.
 
 Safe local review flow:
 
@@ -54,7 +57,7 @@ docs/superpowers/   Design specs and execution plans
 
 ## Contribution Model
 
-This is intended to be a public GitHub repository. Forks, feature branches, and pull requests from authenticated GitHub users are welcome.
+This is a public GitHub repository. Forks, feature branches, and pull requests from authenticated GitHub users are welcome.
 
 Before opening a pull request:
 
