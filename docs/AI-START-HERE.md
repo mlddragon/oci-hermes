@@ -6,8 +6,8 @@ This public document routes an authorized agent to the right source. It intentio
 
 1. Read `AGENTS.md`, `SECURITY.md`, and the task-relevant design, plan, or runbook.
 2. Refresh the public GitHub repository and inspect the live checkout before relying on a remembered state.
-3. If the task depends on organizational placement, commercialization intent, ownership classification, or movement between consulting and publishing, use an authenticated owner-authorized Notion connection.
-4. In Notion, search for **Dillon Project Registry**, fetch the exact **OCI Hermes** row, and follow its **Notion Hub**, **Canonical Knowledge**, and **Write-back Rule** references. Consult **System Architecture & Governance**, **Decision & Context Register**, **IP & Framework Register**, or **Migration Register** only when that row routes the question there.
+3. If the task depends on high-level status, organizational placement, commercialization intent, ownership classification, or movement between consulting and publishing, use an authenticated owner-authorized Notion connection.
+4. In Notion, start from **Dillon Family Operating System** and **Dillon Project Registry**, fetch the exact **OCI Hermes** row, and follow its **Notion Hub**, **Canonical Knowledge**, and **Write-back Rule** references. Consult **System Architecture & Governance**, **Decision & Context Register**, **IP & Framework Register**, or **Migration Register** only when that row routes the question there.
 
 Fetch the full record; a search highlight is not authoritative. If Notion or GitHub is unavailable, identify what could not be verified. Do not replace it with chat memory or copy private context into this public repository.
 
@@ -16,7 +16,7 @@ Fetch the full record; a search highlight is not authoritative. If Notion or Git
 | Subject | Canonical home |
 |---|---|
 | Technical design, deployment tooling, infrastructure definitions, runbooks, code, security boundary, licensing, and repository history | This GitHub repository and its refreshed local checkout |
-| Organizational placement, commercialization intent, ownership classification, and movement between consulting and publishing | The owner's private Notion knowledge system |
+| High-level status, organizational placement, commercialization intent, ownership classification, and movement between consulting and publishing | The owner's private Notion knowledge system |
 | Live provider accounts, deployment state, secrets, endpoints, and runtime data | Deployer-owned systems outside git; verify directly when authorized |
 | Temporary analysis, brainstorming, and execution context | Chat; non-authoritative until written back to the canonical home |
 | Migration history | The Notion Migration Register or repository migration record; provenance only |
@@ -39,7 +39,7 @@ Scope and canonical subject matter outrank timestamps. The newest record is not 
 2. Resolve each fact in the system that owns its subject.
 3. Preserve and report genuine conflicts; do not silently choose the newest copy.
 4. Write repository-owned changes through a branch and pull request with applicable tests, hygiene, secret scans, and runbook updates.
-5. Update the existing OCI Hermes Notion row or routed record for durable organizational placement, commercialization, ownership classification, or high-level status. Reference repository paths, issues, PRs, releases, or commits instead of copying technical content.
+5. Update the existing OCI Hermes Notion row or routed record for durable high-level status, organizational placement, commercialization, or ownership classification. Reference repository paths, issues, PRs, releases, or commits instead of copying technical content.
 6. Never put private organizational material or deployer-specific data in public git, issues, pull requests, logs, or examples.
 
 ## Final persistence check
