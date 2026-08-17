@@ -1,0 +1,11 @@
+---
+description: OCI Hermes repository and cross-system routing
+alwaysApply: true
+---
+
+# OCI Hermes Rules
+
+- Read [AGENTS.md](../../AGENTS.md) before any work.
+- Read [docs/AI-START-HERE.md](../../docs/AI-START-HERE.md) for cross-system identity, organizational placement, ownership, commercialization, Notion, or migration questions.
+- Keep this public repository account-neutral and free of private organizational or deployment-specific material.
+- Run repository hygiene and relevant checks before reporting completion.
