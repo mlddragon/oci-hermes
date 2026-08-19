@@ -1,5 +1,5 @@
 # ChatGPT Instructions
 
-Read and follow [AGENTS.md](AGENTS.md). For cross-system identity, organizational placement, ownership, commercialization, Notion, or migration questions, also start with [docs/AI-START-HERE.md](docs/AI-START-HERE.md).
+Read and follow [AGENTS.md](AGENTS.md). For work that may depend on context outside this repository, also follow the public boundary in [docs/AI-START-HERE.md](docs/AI-START-HERE.md).
 
 Keep private organizational and deployment-specific material out of this public repository.

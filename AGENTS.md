@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Read `docs/AI-START-HERE.md` first when a task depends on cross-system identity, organizational placement, ownership, commercialization, Notion, or migration provenance. That router points to canonical records without copying private material into this public repository.
+Read `docs/AI-START-HERE.md` before work that may depend on context outside this repository. Public tasks remain repository-local; ask a maintainer for the minimum missing decision or sanitized context instead of searching for private systems.
 
 ## Project Scope
 
