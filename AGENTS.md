@@ -1,5 +1,7 @@
 # AGENTS.md
 
+Read `docs/AI-START-HERE.md` before work that may depend on context outside this repository. Public tasks remain repository-local; ask a maintainer for the minimum missing decision or sanitized context instead of searching for private systems.
+
 ## Project Scope
 
 OCI Hermes hydrates private Hermes AI environments on cloud platforms. The first supported target is OCI Always Free hosting for Hermes with a local LLM runtime and private Matrix access.
@@ -38,4 +40,4 @@ The repository is licensed under MPL-2.0. Preserve license notices, keep distrib
 
 ## Current Implementation Stage
 
-The repository currently contains design and execution planning materials plus scaffold configuration. Infrastructure, deployment, and operational scripts should be added incrementally behind reviewed pull requests.
+The repository is in deploy-tooling scaffold phase: design and execution plans, infrastructure and service templates, operational scripts, tests, and runbooks are present. A live OCI deployment and its production, backup/restore, Matrix E2EE, and acceptance gates have not been proven by repository artifacts alone. Continue changes incrementally behind reviewed pull requests.
