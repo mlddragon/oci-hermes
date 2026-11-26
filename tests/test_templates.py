@@ -38,6 +38,9 @@ class TemplateTests(unittest.TestCase):
         values = template_values(config, compartment_ocid="compartment-placeholder")
 
         self.assertEqual(values["REGION"], "us-chicago-1")
+        self.assertEqual(values["OCPUS"], 2)
+        self.assertEqual(values["MEMORY_GB"], 12)
+        self.assertEqual(values["MODEL"], "hf.co/Qwen/Qwen3-4B-GGUF:Q4_K_M")
         self.assertEqual(values["DUCKDNS_HOSTNAME"], "private-neutral-name.duckdns.org")
 
     def test_terraform_vars_template_renders_without_unresolved_placeholders(self):
@@ -48,6 +51,8 @@ class TemplateTests(unittest.TestCase):
         rendered = render_text(template, values)
 
         self.assertIn('"region": "us-chicago-1"', rendered)
+        self.assertIn('"ocpus": 2', rendered)
+        self.assertIn('"memory_gb": 12', rendered)
         self.assertNotIn("{{", rendered)
 
     def test_compose_env_template_renders_bridge_values(self):
@@ -59,6 +64,7 @@ class TemplateTests(unittest.TestCase):
 
         self.assertIn("HERMES_MATRIX_USER_ID=@hermes:private-neutral-name.duckdns.org", rendered)
         self.assertIn("HERMES_TRUSTED_INVITER_IDS=@admin:private-neutral-name.duckdns.org,@primary:private-neutral-name.duckdns.org", rendered)
+        self.assertIn("HERMES_LOCAL_MODEL=hf.co/Qwen/Qwen3-4B-GGUF:Q4_K_M", rendered)
         self.assertIn("HERMES_OPENAI_ENABLED=false", rendered)
         self.assertNotIn("{{", rendered)
 

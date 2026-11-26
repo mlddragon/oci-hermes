@@ -52,7 +52,7 @@
   - public subnet
   - internet gateway
   - NSG/security rules
-  - A1 Flex VM
+  - A1 Flex VM at 2 OCPU / 12 GB RAM
   - 150 GB boot volume
   - SSH key attachment
   - optional reserved public IPv4 only if confirmed Always Free-safe
@@ -69,7 +69,7 @@
 ## Provision OCI
 
 - [ ] Apply reviewed Terraform.
-- [ ] If A1 capacity is unavailable, use patient retry/backoff; do not select paid shape.
+- [ ] If A1 capacity is unavailable, rotate through every home-region availability domain, then retry with backoff; do not select paid shape.
 - [ ] Confirm public IP.
 - [ ] Configure DuckDNS update script.
 - [ ] Confirm hostname resolves to OCI public IP.
@@ -143,7 +143,7 @@
 ## Local Model
 
 - [ ] Install Ollama on ARM64.
-- [ ] Pull `NousResearch/Hermes-3-Llama-3.1-8B-GGUF:Q4_K_M`.
+- [ ] Pull `hf.co/Qwen/Qwen3-4B-GGUF:Q4_K_M`.
 - [ ] Bind model service to localhost/private network only.
 - [ ] Run terminal inference test.
 - [ ] Benchmark representative prompts.
@@ -278,7 +278,7 @@
 - [ ] Element clients work on macOS, iPad, iPhone, and web.
 - [ ] Primary and secondary user E2EE recovery verified.
 - [ ] Hermes bot verified and working in approved encrypted rooms.
-- [ ] Local Hermes 8B chat works through Matrix.
+- [ ] Local Qwen3 4B chat works through Matrix.
 - [ ] OpenAI approval-gated routing works.
 - [ ] Backups, restore test, alerts, and health checks work.
 - [ ] No non-Matrix backend ports are public.

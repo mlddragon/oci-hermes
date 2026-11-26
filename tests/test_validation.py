@@ -24,6 +24,19 @@ class ValidationTests(unittest.TestCase):
         config = HermesConfig()
         config.validate()
         self.assertEqual(config.region, "us-chicago-1")
+        self.assertEqual(config.ocpus, 2)
+        self.assertEqual(config.memory_gb, 12)
+        self.assertEqual(config.model, "hf.co/Qwen/Qwen3-4B-GGUF:Q4_K_M")
+
+    def test_rejects_oversized_always_free_shape(self):
+        config = HermesConfig(ocpus=4, memory_gb=24)
+        with self.assertRaises(ConfigError):
+            config.validate()
+
+    def test_rejects_non_default_local_model(self):
+        config = HermesConfig(model="hf.co/NousResearch/Hermes-3-Llama-3.1-8B-GGUF:Q4_K_M")
+        with self.assertRaises(ConfigError):
+            config.validate()
 
 
 if __name__ == "__main__":

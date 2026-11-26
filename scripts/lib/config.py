@@ -63,7 +63,9 @@ class HermesConfig:
         if self.shape != DEFAULT_SHAPE:
             raise ConfigError("v1 only supports VM.Standard.A1.Flex.")
         if self.ocpus != DEFAULT_OCPUS or self.memory_gb != DEFAULT_MEMORY_GB:
-            raise ConfigError("v1 Always Free target is 4 OCPU and 24 GB RAM.")
+            raise ConfigError("v1 Always Free target is 2 OCPU and 12 GB RAM.")
+        if self.model != DEFAULT_MODEL:
+            raise ConfigError("v1 local model is Qwen3 4B GGUF Q4_K_M.")
         if self.boot_volume_gb < 50 or self.boot_volume_gb > 200:
             raise ConfigError("Boot volume must be between 50 and 200 GB for v1.")
         reject_secret_material(asdict(self))

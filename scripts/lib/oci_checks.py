@@ -57,3 +57,26 @@ def resolve_compartment_ocid(compartment: str) -> str:
     if len(matches) != 1:
         raise RuntimeError(f"Expected exactly one ACTIVE compartment named {compartment}, found {len(matches)}.")
     return matches[0]["id"]
+
+
+def list_availability_domains(compartment: str) -> list[str]:
+    compartment_id = resolve_compartment_ocid(compartment)
+    result = run(
+        [
+            "oci",
+            "iam",
+            "availability-domain",
+            "list",
+            "--compartment-id",
+            compartment_id,
+            "--output",
+            "json",
+        ],
+        check=True,
+        quiet=True,
+    )
+    data = json.loads(result.stdout)
+    names = [item["name"] for item in data.get("data", []) if item.get("name")]
+    if not names:
+        raise RuntimeError("OCI CLI returned no availability domains.")
+    return names
