@@ -22,12 +22,12 @@ use someone else's cloud, DNS, backup, Matrix, model, or OpenAI account.
 4. Run `scripts/hermesctl render`.
 5. Confirm `git status --short` does not show `.hermes/` files.
 6. Run `scripts/hermesctl plan`.
-7. Review the plan for Always Free-safe resources only.
+7. Review the plan for Always Free-safe resources only: `VM.Standard.A1.Flex` at 2 OCPU / 12 GB, no paid shapes.
 8. Stop for human review before `apply`.
 
 ## Provisioning Path
 
-1. Run `scripts/hermesctl apply`.
+1. Run `scripts/hermesctl apply` for a one-shot apply, or `scripts/hermesctl reapply` to rotate through every availability domain on `Out of host capacity` and retry after a full cycle.
 2. Type `APPLY OCI HERMES` only after reviewing the plan.
 3. Export the assigned host locally as `HERMES_HOST`.
 4. Run `scripts/hermesctl bootstrap-host --host "$HERMES_HOST"`.
@@ -49,6 +49,7 @@ use someone else's cloud, DNS, backup, Matrix, model, or OpenAI account.
 ## Stop Conditions
 
 - OCI plan includes paid shapes, paid load balancers, managed databases, or reserved public IPv4.
+- OCI plan requests more than 2 OCPU or 12 GB A1 memory.
 - SSH is open wider than the approved CIDR.
 - Any real secret appears in `git status`, `git diff`, CLI output, logs, or docs.
 - Backend ports are publicly reachable.

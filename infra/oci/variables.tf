@@ -31,15 +31,15 @@ variable "shape" {
 }
 
 variable "ocpus" {
-  description = "A1 Flex OCPU count."
+  description = "A1 Flex OCPU count. v1 Always Free target is 2."
   type        = number
-  default     = 4
+  default     = 2
 }
 
 variable "memory_gb" {
-  description = "A1 Flex memory in GB."
+  description = "A1 Flex memory in GB. v1 Always Free target is 12."
   type        = number
-  default     = 24
+  default     = 12
 }
 
 variable "boot_volume_gb" {

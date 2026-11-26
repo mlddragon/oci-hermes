@@ -14,7 +14,7 @@ Build a subscription-free, secure Hermes AI installation on OCI Always Free that
 
 ## Architecture
 
-One OCI Always Free `VM.Standard.A1.Flex` instance runs the stack on Ubuntu 24.04 LTS ARM64. The target size is 4 OCPU, 24 GB RAM, and a 150 GB boot volume, subject to final Always Free eligibility and capacity checks.
+One OCI Always Free `VM.Standard.A1.Flex` instance runs the stack on Ubuntu 24.04 LTS ARM64. The target size is 2 OCPU, 12 GB RAM, and a 150 GB boot volume, matching the Always Free Ampere A1 entitlement as of August 2026.
 
 Matrix is the public HTTPS client-access layer. Caddy terminates TLS on ports 80/443, proxies Matrix client traffic, and keeps federation disabled. Hermes, Ollama, model services, bot bridge services, and task-execution containers stay private on localhost or private Docker networks.
 
@@ -31,7 +31,7 @@ The user-facing flow is:
 
 The account stays on OCI Free Tier/Always Free for v1. Pay-As-You-Go is not enabled unless explicitly revisited after concrete capacity or retention blockers.
 
-The home region must be a US region. Always Free A1 capacity takes priority over latency. If A1 capacity is unavailable, use patient retry/backoff within OCI limits and terms; do not select paid shapes.
+The home region must be a US region. Always Free A1 capacity takes priority over latency. If A1 capacity is unavailable, rotate through every availability domain in the home region, then use patient retry/backoff within OCI limits and terms; do not select paid shapes.
 
 Terraform Community Edition is used first for career familiarity, with plain Terraform-compatible HCL that should remain OpenTofu-compatible. Terraform state stays local, encrypted at rest, excluded from git, and backed up encrypted. HCP Terraform is not used.
 
@@ -81,7 +81,7 @@ Bot attention rules:
 - Use pause/resume commands.
 - Default to mention-only or paused behavior in multi-human rooms unless explicitly changed.
 
-Local inference uses Ollama in v1, with llama.cpp as fallback. The primary local model is Hermes 3 Llama 3.1 8B GGUF `Q4_K_M`. Benchmark local CPU-only latency and tokens/second on OCI A1 before adding any smaller fast local model.
+Local inference uses Ollama in v1, with llama.cpp as fallback. The primary local model is Qwen3 4B GGUF `Q4_K_M` (`hf.co/Qwen/Qwen3-4B-GGUF:Q4_K_M`). Benchmark local CPU-only latency and tokens/second on OCI A1 (2 OCPU) before considering a larger quant or an 8B stretch model.
 
 OpenAI is optional and approval-gated. Use one dedicated OpenAI API project/key, not multiple personal ChatGPT subscription accounts. Set the initial monthly budget target to $5, or the lowest practical current project/billing limit if exact $5 enforcement is unavailable. Warn at about 50%, 80%, and 95%.
 
@@ -284,7 +284,7 @@ Runbooks reference secret locations but do not include raw secrets.
 - E2EE, cross-signing, and recovery/key backup are verified for primary and secondary users.
 - Matrix rooms are created for Primary AI, Secondary AI, Shared AI, Ops/Admin, and Recovery/Test.
 - Hermes joins approved encrypted rooms as a verified E2EE-capable bot.
-- Hermes can perform basic chat through Matrix using the local Hermes 3 8B Q4_K_M model.
+- Hermes can perform basic chat through Matrix using the local Qwen3 4B Q4_K_M model.
 - OpenAI routing can recommend cloud use and requires explicit per-request approval before any API call.
 - OpenAI spend limit target and warning thresholds are configured.
 - Restic encrypted backups run nightly with lock-state reporting.
@@ -296,7 +296,7 @@ Runbooks reference secret locations but do not include raw secrets.
 ## Open Issues For Execution-Time Verification
 
 - Verify current OCI Always Free treatment of reserved public IPv4 before reserving one.
-- Verify current OCI A1 capacity in US regions before selecting home region.
+- Verify current OCI A1 capacity in US regions before selecting home region. Always Free A1 is 2 OCPU and 12 GB RAM as of August 2026; do not plan 4 OCPU / 24 GB on Free Tier.
 - Verify current Continuwuity vs Tuwunel release health, ARM64 support, and Element/Element X compatibility.
 - Verify current OpenAI API project budget controls and minimum enforceable spend limits.
 - Verify final E2EE-capable Matrix SDK choice for the Hermes bridge.

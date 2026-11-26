@@ -8,9 +8,18 @@ import time
 from dataclasses import asdict
 from pathlib import Path
 
-from lib.config import HermesConfig, config_exists, load_config, save_config
-from lib.constants import CONFIG_FILE, LOCAL_DIR, RENDER_DIR, REPO_ROOT
-from lib.oci_checks import oci_auth_summary, public_key_exists, tool_status
+from lib.config import HermesConfig, config_exists, config_from_dict, load_config, save_config
+from lib.constants import (
+    CONFIG_FILE,
+    DEFAULT_MEMORY_GB,
+    DEFAULT_MODEL,
+    DEFAULT_OCPUS,
+    LOCAL_DIR,
+    MODEL_TERMS_PHRASE,
+    RENDER_DIR,
+    REPO_ROOT,
+)
+from lib.oci_checks import list_availability_domains, oci_auth_summary, public_key_exists, tool_status
 from lib.prompting import ask, ask_bool, ask_secret, require_phrase
 from lib.redaction import redact_mapping, redact_text
 from lib.runner import CommandError, run, set_verbose
@@ -58,11 +67,27 @@ def cmd_doctor(_: argparse.Namespace) -> None:
         raise SystemExit(f"Missing required local tools: {', '.join(missing)}")
 
 
+def load_config_for_init() -> HermesConfig:
+    if not config_exists():
+        return HermesConfig()
+    try:
+        return load_config()
+    except ConfigError:
+        with CONFIG_FILE.open("r", encoding="utf-8") as handle:
+            values = json.load(handle)
+        if not isinstance(values, dict):
+            return HermesConfig()
+        values["ocpus"] = DEFAULT_OCPUS
+        values["memory_gb"] = DEFAULT_MEMORY_GB
+        values["model"] = DEFAULT_MODEL
+        return config_from_dict(values)
+
+
 def cmd_init(args: argparse.Namespace) -> None:
     if args.non_interactive:
         config = HermesConfig()
     else:
-        current = load_config() if config_exists() else HermesConfig()
+        current = load_config_for_init()
         config = HermesConfig(
             region=ask("OCI region", current.region),
             compartment=ask("OCI compartment name or OCID", current.compartment),
@@ -137,6 +162,46 @@ def tofu_apply_command(tfvars: Path, *, auto_approve: bool = False) -> list[str]
     return command
 
 
+def read_tfvars_availability_domain(tfvars: Path) -> str:
+    data = json.loads(tfvars.read_text(encoding="utf-8"))
+    return str(data.get("availability_domain") or "")
+
+
+def write_tfvars_availability_domain(tfvars: Path, availability_domain: str) -> None:
+    data = json.loads(tfvars.read_text(encoding="utf-8"))
+    data["availability_domain"] = availability_domain
+    tfvars.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def rotate_availability_domains(ads: list[str], start: str) -> list[str]:
+    if not ads:
+        return []
+    if start in ads:
+        index = ads.index(start)
+        return ads[index:] + ads[:index]
+    return list(ads)
+
+
+def availability_domains_for_apply() -> list[str]:
+    config = load_or_exit()
+    try:
+        return list_availability_domains(config.compartment)
+    except (RuntimeError, CommandError, json.JSONDecodeError, OSError) as exc:
+        print(
+            f"Could not list availability domains; retrying the rendered AD. {redact_text(str(exc))}",
+            file=sys.stderr,
+        )
+        return []
+
+
+def persist_availability_domain(availability_domain: str) -> None:
+    config = load_or_exit()
+    if config.availability_domain == availability_domain:
+        return
+    config.availability_domain = availability_domain
+    save_config(config)
+
+
 def run_tofu_apply(args: argparse.Namespace, *, retry_on_capacity: bool) -> None:
     tfvars = require_rendered_tfvars()
     require_phrase("APPLY OCI HERMES", "Cloud resources will be created or changed")
@@ -147,18 +212,33 @@ def run_tofu_apply(args: argparse.Namespace, *, retry_on_capacity: bool) -> None
 
     command = tofu_apply_command(tfvars, auto_approve=True)
     env = tofu_automation_env()
+    discovered = availability_domains_for_apply()
+    current = read_tfvars_availability_domain(tfvars)
+    ads = rotate_availability_domains(discovered, current) or [current]
+    ad_index = 0
     while True:
+        availability_domain = ads[ad_index % len(ads)]
+        if availability_domain:
+            write_tfvars_availability_domain(tfvars, availability_domain)
+            print(f"Applying in availability domain {availability_domain}.", file=sys.stderr)
         result = run(command, cwd=cwd, stream=True, stream_capture=True, check=False, env=env)
         output = result.stdout or ""
         if OCI_CAPACITY_ERROR in output:
-            print(
-                f"OCI host capacity unavailable; sleeping {REAPPLY_RETRY_SECONDS // 60} minutes before retrying.",
-                file=sys.stderr,
-            )
-            time.sleep(REAPPLY_RETRY_SECONDS)
+            ad_index += 1
+            if ad_index % len(ads) == 0:
+                print(
+                    f"OCI host capacity unavailable in all {len(ads)} availability domain(s); "
+                    f"sleeping {REAPPLY_RETRY_SECONDS // 60} minutes before retrying.",
+                    file=sys.stderr,
+                )
+                time.sleep(REAPPLY_RETRY_SECONDS)
+            else:
+                print("OCI host capacity unavailable; trying the next availability domain.", file=sys.stderr)
             continue
         if result.returncode != 0:
             raise SystemExit(result.returncode)
+        if availability_domain:
+            persist_availability_domain(availability_domain)
         return
 
 
@@ -243,7 +323,7 @@ def cmd_setup_matrix(_: argparse.Namespace) -> None:
 
 def cmd_pull_model(args: argparse.Namespace) -> None:
     host = require_remote_host(args)
-    require_phrase("I ACCEPT HERMES MODEL TERMS", "Model license terms must be accepted before download")
+    require_phrase(MODEL_TERMS_PHRASE, "Qwen Apache-2.0 model terms must be accepted before download")
     model = load_or_exit().model
     run(["ssh", f"ubuntu@{host}", f"sudo docker exec hermes-ollama ollama pull {model}"])
 

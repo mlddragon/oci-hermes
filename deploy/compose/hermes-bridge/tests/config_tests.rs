@@ -36,7 +36,7 @@ fn base_env(dir: &std::path::Path) -> Vec<(&'static str, String)> {
         ("OLLAMA_BASE_URL", "http://ollama:11434".to_string()),
         (
             "HERMES_LOCAL_MODEL",
-            "hf.co/NousResearch/Hermes-3-Llama-3.1-8B-GGUF:Q4_K_M".to_string(),
+            "hf.co/Qwen/Qwen3-4B-GGUF:Q4_K_M".to_string(),
         ),
         ("HERMES_OPENAI_ENABLED", "false".to_string()),
     ]
